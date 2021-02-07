@@ -19,7 +19,7 @@ class Task(Base):
 
         --------------------------------------------\n
         Has the following relationships:\n
-        item - the item this note is associated with\n
+        item - the item this task is associated with\n
         """
 
     __tablename__ = "tasks"
