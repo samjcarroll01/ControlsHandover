@@ -39,13 +39,17 @@ class TestItem(TestCase):
 
     def test_a_saved_item_that_is_not_complete_does_not_have_a_completed_at_timestamp(self):
         item = self._db.find(Item, 1)
+        self._db.incomplete(Item, item.id)
+
+        item = self._db.find(Item, item.id)
+
         self.assertIsNone(item.completed_at)
 
     def test_a_saved_item_that_is_completed_has_a_completed_at_timestamp(self):
         item = self._db.find(Item, 1)
-        self._db.complete(Item, 1);
+        self._db.complete(Item, item.id);
 
-        item = self._db.find(Item, 1)
+        item = self._db.find(Item, item.id)
         self.assertIsNotNone(item.completed_at)
         self.assertEqual(item.updated_at, item.completed_at)
         self.assertEqual(item.updated_by, os.getlogin())

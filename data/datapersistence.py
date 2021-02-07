@@ -95,11 +95,37 @@ class SqlitePersistence(IDataPersistence):
         return element
 
     def complete(self, entitytype, id):
+        """
+        Marks an entity as complete by adding a timestamp for completed_at
+
+        :param entitytype: the class if the entity you are searching for
+        :param id: the id of the entity
+        :return: returns the completed entity
+        """
         element = self.find(entitytype, id)
 
         # Set the completed_at, updated_at, and updated_by fields
         element.completed_at = datetime.datetime.now()
         element.updated_at = element.completed_at
+        element.updated_by = os.getlogin()
+
+        # Save the element to the database
+        self.session.commit()
+        return element
+
+    def incomplete(self, entitytype, id):
+        """
+        Marks an entity as complete by adding a timestamp for completed_at
+
+        :param entitytype: the class if the entity you are searching for
+        :param id: the id of the entity
+        :return: returns the completed entity
+        """
+        element = self.find(entitytype, id)
+
+        # Set the completed_at to None, Set the updated_at, and updated_by fields
+        element.completed_at = None
+        element.updated_at = datetime.datetime.now()
         element.updated_by = os.getlogin()
 
         # Save the element to the database
