@@ -10,6 +10,7 @@ class Item(Base):
 
     id = Column(Integer, Sequence('user_id_seq'), primary_key=True)
     rig = Column(String(50), nullable=True)
+    case = Column(String(20), nullable=True)
     description = Column(String(255))
     created_by = Column(String(50))
     updated_by = Column(String(50))

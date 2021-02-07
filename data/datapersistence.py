@@ -1,24 +1,15 @@
 import abc
 import sys
+import datetime
+import os
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models.base import Base
 
 
-class IDataPersistence(metaclass=abc.ABCMeta):
-    @classmethod
-    def __subclasshook__(cls, subclass):
-        return (hasattr(subclass, 'save') and
-                callable(subclass.save) and
-                hasattr(subclass, 'find') and
-                callable(subclass.find) and
-                hasattr(subclass, 'all') and
-                callable(subclass.all) and
-                hasattr(subclass, 'edit') and
-                callable(subclass.edit) and
-                hasattr(subclass, 'delete') and
-                callable(subclass.delete))
+class IDataPersistence:
+    pass
 
 
 class SqlitePersistence(IDataPersistence):
@@ -52,6 +43,13 @@ class SqlitePersistence(IDataPersistence):
         :return: True if success; Error message if failure
         """
         try:
+            # Add timestamps and user information
+            entity.created_at = datetime.datetime.now()
+            entity.updated_at = entity.created_at
+            entity.created_by = os.getlogin()
+            entity.updated_by = entity.created_by
+
+            # add entity to the session and save it to the database.
             self.session.add(entity)
             self.session.commit()
             return True
@@ -59,31 +57,51 @@ class SqlitePersistence(IDataPersistence):
             return "Unexpected Error:'%s'" % sys.exc_info()[0]
 
     # Pass in the class and the id of element you wish to find.
-    def find(self, type, id):
+    def find(self, entitytype, id):
         """
         Find an entity in the database based on its id (integer).
 
-        :param type: the class if the entity you are searching for
+        :param entitytype: the class if the entity you are searching for
         :param id: the id of the entity
         :return: returns the results of the query in the form of an
                  object that of the type requested.
         """
-        return self.session.query(type).filter_by(id=id).first()
+        return self.session.query(entitytype).filter_by(id=id).first()
 
-    def edit(self, type, id, data):
+    def edit(self, entitytype, id, data):
         """
 
-        :param type: the class if the entity you are searching for
+        :param entitytype: the class if the entity you are searching for
         :param id: the id of the entity
         :param data: a dictionary containing the data you wish to
                      change on the existing entity
         :return: returns the updated object.
         """
-        element = self.session.query(type).filter_by(id=id).first()
-        for key, value in data:
-            element.setattr = value
 
+        # Get the entity that needs to be updated.
+        element = self.session.query(entitytype).filter_by(id=id).first()
+
+        # Go through the dictionary of data to be changed and set the values on
+        # that entity to the values in the dictionary
+        for key, value in data:
+            element.setattr[key] = value
+
+        # Update the timestamp and user info for updated_at and updated_by
+        element.updated_at = datetime.datetime.now()
+        element.updated_by = os.getlogin()
+
+        # Save the updated information to the database
         self.session.commit()
         return element
 
+    def complete(self, entitytype, id):
+        element = self.find(entitytype, id)
 
+        # Set the completed_at, updated_at, and updated_by fields
+        element.completed_at = datetime.datetime.now()
+        element.updated_at = element.completed_at
+        element.updated_by = os.getlogin()
+
+        # Save the element to the database
+        self.session.commit()
+        return element
