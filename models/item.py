@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Integer, String, Sequence, DateTime
 from sqlalchemy.orm import relationship
 from base import Base
-from note import Note
-from task import Task
+from models.note import Note
+from models.task import Task
 
 
 class Item(Base):
@@ -16,5 +16,8 @@ class Item(Base):
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
     completed_at = Column(DateTime)
-    notes = relationship("Note", order_by=Note.id, back_populates="notes")
-    tasks = relationship("Task", order_by=Task.id, back_populates="tasks")
+    notes = relationship("Note", order_by=Note.created_at, back_populates="item")
+    tasks = relationship("Task", order_by=Task.created_at, back_populates="item")
+
+    def __init__(self):
+        Base.__init__(self)

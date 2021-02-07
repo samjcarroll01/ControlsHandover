@@ -14,4 +14,4 @@ class Note(Base):
     updated_at = Column(DateTime)
     item_id = Column(Integer, ForeignKey('items.id'))
 
-    item = relationship("Item", back_populates="items")
+    item = relationship("Item", back_populates="notes")

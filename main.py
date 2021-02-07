@@ -1,16 +1,26 @@
-# This is a sample Python script.
+import datetime
+import os
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+from models.item import Item
+from models.note import Note
+from models.task import Task
+from datapersistence import SqlitePersistence
+
+db = SqlitePersistence(":memory:")
+
+item = Item()
+item.rig = "X04"
+item.description = "Something that needs to be handed over"
+item.created_at = datetime.datetime.now()
+item.updated_at = datetime.datetime.now()
+item.created_by = os.getlogin()
+item.updated_by = os.getlogin()
+item.case = "CAS-12345"
+
+db.save(item)
+
+db_item = db.find(Item, 1)
+
+print(db_item.rig)
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/

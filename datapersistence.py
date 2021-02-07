@@ -2,7 +2,6 @@ import abc
 import sys
 
 from sqlalchemy import create_engine
-from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models.item import Item
 from models.note import Note
@@ -42,7 +41,8 @@ class SqlitePersistence(IDataPersistence):
 
         :param dbpath: string representation of the path to the database.
         """
-        self.engine = create_engine("sqlite:///'%s'" % str(dbpath))
+        connectionString = "sqlite:///%s" % str(dbpath)
+        self.engine = create_engine(connectionString)
         Base.metadata.create_all(self.engine)
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
