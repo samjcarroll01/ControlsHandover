@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Sequence, DateTime
 from sqlalchemy.orm import relationship
-from base import Base
+from models.base import Base
 from models.note import Note
 from models.task import Task
 
