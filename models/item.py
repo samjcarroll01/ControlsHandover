@@ -6,6 +6,25 @@ from models.task import Task
 
 
 class Item(Base):
+    """
+    Model Class\n
+    ---------------------------------------------\n
+    Contains the following columns in the table:\n
+    id - autoincrementing integer\n
+    rig - String with max length of 50\n
+    case - String with max length of 20\n
+    description - String with max length of 255\n
+    created_by - String with max length of 50\n
+    updated_by - String with max length of 50\n
+    created_at - Timestamp\n
+    updated_at - Timestamp\n
+    completed_at - Timestamp\n
+    --------------------------------------------\n
+    Has the following relationships:\n
+    notes - List of notes associated with the item\n
+    tasks - List of tasks associated with the item\n
+    """
+
     __tablename__ = "items"
 
     id = Column(Integer, Sequence('user_id_seq'), primary_key=True)

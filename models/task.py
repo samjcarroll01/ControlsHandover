@@ -4,6 +4,24 @@ from models.base import Base
 
 
 class Task(Base):
+    """
+        Model Class\n
+        ---------------------------------------------\n
+        Contains the following columns in the table:\n
+        id - autoincrementing integer\n
+        description - String with max length of 255\n
+        created_by - String with max length of 50\n
+        updated_by - String with max length of 50\n
+        created_at - Timestamp\n
+        updated_at - Timestamp\n
+        completed_at - Timestamp\n
+        item_id - Integer\n
+
+        --------------------------------------------\n
+        Has the following relationships:\n
+        item - the item this note is associated with\n
+        """
+
     __tablename__ = "tasks"
 
     id = Column(Integer, Sequence('user_id_seq'), primary_key=True)
