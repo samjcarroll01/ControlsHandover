@@ -1,13 +1,15 @@
 from unittest import TestCase
 from models.item import Item
+from models.note import Note
+from models.task import Task
 from data.datapersistence import SqlitePersistence
 import os
-import datetime
-import math
 
 
 class TestItem(TestCase):
     _item = Item()
+    _note = Note()
+    _task = Task()
     _db = SqlitePersistence(":memory:")
 
     def setUp(self):
@@ -15,6 +17,14 @@ class TestItem(TestCase):
         self._item.description = "Something to handover"
         self._item.case = "CAS-12345"
         self._db.save(self._item)
+
+        self._note.description = "Some update"
+        self._note.item_id = 1
+        self._db.save(self._note)
+
+        self._task.description = "Some update"
+        self._task.item_id = 1
+        self._db.save(self._task)
 
     def test_an_item_has_a_rig(self):
         self.assertEqual(self._item.rig, "X01")
@@ -55,7 +65,13 @@ class TestItem(TestCase):
         self.assertEqual(item.updated_by, os.getlogin())
 
     def test_an_item_has_notes(self):
-        pass
+        note = self._db.find(Note, 1)
+        item = self._db.find(Item, 1)
+
+        self.assertEqual(item.notes[0].description, note.description)
 
     def test_an_item_has_tasks(self):
-        pass
+        task = self._db.find(Task, 1)
+        item = self._db.find(Item, 1)
+
+        self.assertEqual(item.tasks[0].description, task.description)
