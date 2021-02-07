@@ -1,4 +1,3 @@
-import abc
 import sys
 import datetime
 import os
@@ -6,21 +5,18 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models.base import Base
+from models.item import Item
 
 
-class IDataPersistence:
-    pass
-
-
-class SqlitePersistence(IDataPersistence):
+class SqlitePersistence:
     """
     Handles read/write operations of a sqlite database.
 
     Constructor requires a path to the database.
     """
+
     engine = None
     session = None
-
 
     def __init__(self, dbpath):
         """
@@ -56,7 +52,6 @@ class SqlitePersistence(IDataPersistence):
         except:
             return "Unexpected Error:'%s'" % sys.exc_info()[0]
 
-    # Pass in the class and the id of element you wish to find.
     def find(self, entitytype, id):
         """
         Find an entity in the database based on its id (integer).
@@ -68,6 +63,12 @@ class SqlitePersistence(IDataPersistence):
         """
         return self.session.query(entitytype).filter_by(id=id).first()
 
+    def get_incomplete_items(self):
+        """
+        :return: return list of items that are incomplete
+        """
+        return self.session.query(Item).filter(Item.completed_at.is_(None))
+
     def edit(self, entitytype, id, data):
         """
 
@@ -78,21 +79,24 @@ class SqlitePersistence(IDataPersistence):
         :return: returns the updated object.
         """
 
-        # Get the entity that needs to be updated.
-        element = self.session.query(entitytype).filter_by(id=id).first()
+        try:
+            # Get the entity that needs to be updated.
+            element = self.session.query(entitytype).filter_by(id=id).first()
 
-        # Go through the dictionary of data to be changed and set the values on
-        # that entity to the values in the dictionary
-        for key, value in data:
-            element.setattr[key] = value
+            # Go through the dictionary of data to be changed and set the values on
+            # that entity to the values in the dictionary
+            for key, value in data:
+                element.setattr[key] = value
 
-        # Update the timestamp and user info for updated_at and updated_by
-        element.updated_at = datetime.datetime.now()
-        element.updated_by = os.getlogin()
+            # Update the timestamp and user info for updated_at and updated_by
+            element.updated_at = datetime.datetime.now()
+            element.updated_by = os.getlogin()
 
-        # Save the updated information to the database
-        self.session.commit()
-        return element
+            # Save the updated information to the database
+            self.session.commit()
+            return element
+        except:
+            return "Unexpected Error:'%s'" % sys.exc_info()[0]
 
     def complete(self, entitytype, id):
         """
@@ -102,16 +106,19 @@ class SqlitePersistence(IDataPersistence):
         :param id: the id of the entity
         :return: returns the completed entity
         """
-        element = self.find(entitytype, id)
+        try:
+            element = self.find(entitytype, id)
 
-        # Set the completed_at, updated_at, and updated_by fields
-        element.completed_at = datetime.datetime.now()
-        element.updated_at = element.completed_at
-        element.updated_by = os.getlogin()
+            # Set the completed_at, updated_at, and updated_by fields
+            element.completed_at = datetime.datetime.now()
+            element.updated_at = element.completed_at
+            element.updated_by = os.getlogin()
 
-        # Save the element to the database
-        self.session.commit()
-        return element
+            # Save the element to the database
+            self.session.commit()
+            return element
+        except:
+            return "Unexpected Error:'%s'" % sys.exc_info()[0]
 
     def incomplete(self, entitytype, id):
         """
@@ -121,13 +128,16 @@ class SqlitePersistence(IDataPersistence):
         :param id: the id of the entity
         :return: returns the completed entity
         """
-        element = self.find(entitytype, id)
+        try:
+            element = self.find(entitytype, id)
 
-        # Set the completed_at to None, Set the updated_at, and updated_by fields
-        element.completed_at = None
-        element.updated_at = datetime.datetime.now()
-        element.updated_by = os.getlogin()
+            # Set the completed_at to None, Set the updated_at, and updated_by fields
+            element.completed_at = None
+            element.updated_at = datetime.datetime.now()
+            element.updated_by = os.getlogin()
 
-        # Save the element to the database
-        self.session.commit()
-        return element
+            # Save the element to the database
+            self.session.commit()
+            return element
+        except:
+            return "Unexpected Error:'%s'" % sys.exc_info()[0]
