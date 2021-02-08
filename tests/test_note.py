@@ -43,3 +43,12 @@ class TestNote(TestCase):
     def test_a_saved_note_has_an_updated_by(self):
         note = self._db.find(Note, 1)
         self.assertEqual(note.updated_by, os.getlogin())
+
+    def test_a_note_can_be_edited(self):
+        note = self._db.find(Note, 1)
+
+        data = {"description": "a note"}
+        self._db.edit(Note, note.id, data)
+        edited = self._db.find(Note, note.id)
+
+        self.assertEqual(data["description"], edited.description)

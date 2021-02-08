@@ -54,3 +54,12 @@ class TestTask(TestCase):
         self._db.incomplete(Task, task.id)
         task = self._db.find(Task, 1)
         self.assertIsNone(task.completed_at)
+
+    def test_a_task_can_be_edited(self):
+        task = self._db.find(Task, 1)
+
+        data = {"description": "a task"}
+        self._db.edit(Task, task.id, data)
+        edited = self._db.find(Task, task.id)
+
+        self.assertEqual(data["description"], edited.description)

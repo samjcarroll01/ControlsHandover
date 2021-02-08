@@ -86,7 +86,6 @@ class SqlitePersistence:
             # Go through the dictionary of data to be changed and set the values on
             # that entity to the values in the dictionary
             for key in data.keys():
-                print(key)
                 setattr(element, key, data[key])
 
             # Update the timestamp and user info for updated_at and updated_by
