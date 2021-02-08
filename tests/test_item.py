@@ -75,3 +75,14 @@ class TestItem(TestCase):
         item = self._db.find(Item, 1)
 
         self.assertEqual(item.tasks[0].description, task.description)
+
+    def test_an_item_can_be_edited(self):
+        item = self._db.find(Item, 1)
+
+        data = {"rig": "X03", "description": "something else", "case": "123456"}
+        self._db.edit(Item, item.id, data)
+        edited = self._db.find(Item, 1)
+
+        self.assertEqual(data["rig"], edited.rig)
+        self.assertEqual(data["description"], edited.description)
+        self.assertEqual(data["case"], edited.case)
