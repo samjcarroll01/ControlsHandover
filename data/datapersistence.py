@@ -86,6 +86,12 @@ class SqlitePersistence:
             # Go through the dictionary of data to be changed and set the values on
             # that entity to the values in the dictionary
             for key in data.keys():
+                if key == "completed_at" \
+                        or key == "updated_at" \
+                        or key == "created_at" \
+                        or key == "created_by" \
+                        or key == "updated_by":
+                    continue
                 setattr(element, key, data[key])
 
             # Update the timestamp and user info for updated_at and updated_by
@@ -139,5 +145,11 @@ class SqlitePersistence:
             # Save the element to the database
             self.session.commit()
             return element
+        except:
+            return "Unexpected Error:'%s'" % sys.exc_info()[0]
+
+    def get_items_completed_in_past_day(self):
+        try:
+            self.session.query(Item).filter(Item.completed_at > datetime.datetime.now() - datetime.timedelta(days=1))
         except:
             return "Unexpected Error:'%s'" % sys.exc_info()[0]

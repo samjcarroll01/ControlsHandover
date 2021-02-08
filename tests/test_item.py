@@ -4,6 +4,7 @@ from models.note import Note
 from models.task import Task
 from data.datapersistence import SqlitePersistence
 import os
+import datetime
 
 
 class TestItem(TestCase):
@@ -79,10 +80,29 @@ class TestItem(TestCase):
     def test_an_item_can_be_edited(self):
         item = self._db.find(Item, 1)
 
-        data = {"rig": "X03", "description": "something else", "case": "123456"}
+        data = {"rig": "X03",
+                "description": "something else",
+                "case": "123456"}
         self._db.edit(Item, item.id, data)
         edited = self._db.find(Item, 1)
 
         self.assertEqual(data["rig"], edited.rig)
         self.assertEqual(data["description"], edited.description)
         self.assertEqual(data["case"], edited.case)
+
+    def test_created_updated_and_completed_properties_cannot_be_directly_edited(self):
+        item = self._db.find(Item, 1)
+
+        data = {"completed_at": datetime.datetime.now() - datetime.timedelta(minutes=1),
+                "updated_at": datetime.datetime.now() - datetime.timedelta(minutes=1),
+                "created_at": datetime.datetime.now() - datetime.timedelta(minutes=1),
+                "created_by": "foo",
+                "updated_by": "bar"}
+        self._db.edit(Item, item.id, data)
+        edited = self._db.find(Item, 1)
+
+        self.assertNotEqual(data["completed_at"], edited.completed_at)
+        self.assertNotEqual(data["updated_at"], edited.updated_at)
+        self.assertNotEqual(data["created_at"], edited.created_at)
+        self.assertNotEqual(data["created_by"], edited.created_by)
+        self.assertNotEqual(data["updated_by"], edited.updated_by)
