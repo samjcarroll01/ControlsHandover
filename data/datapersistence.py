@@ -2,10 +2,12 @@ import sys
 import datetime
 import os
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, delete
 from sqlalchemy.orm import sessionmaker
 from models.base import Base
 from models.item import Item
+from models.note import Note
+from models.task import Task
 
 
 class SqlitePersistence:
@@ -17,6 +19,7 @@ class SqlitePersistence:
 
     engine = None
     session = None
+    dbpath = None
 
     def __init__(self, dbpath):
         """
@@ -25,11 +28,8 @@ class SqlitePersistence:
 
         :param dbpath: string representation of the path to the database.
         """
-        connectionString = "sqlite:///%s" % str(dbpath)
-        self.engine = create_engine(connectionString)
-        Base.metadata.create_all(self.engine)
-        Session = sessionmaker(bind=self.engine)
-        self.session = Session()
+        self.dbpath = dbpath
+        self._setup_session()
 
     def save(self, entity):
         """
@@ -50,7 +50,7 @@ class SqlitePersistence:
             self.session.commit()
             return True
         except:
-            return "Unexpected Error:'%s'" % sys.exc_info()[0]
+            return "Unexpected Error:'%s' - '%s'" % (sys.exc_info()[0], sys.exc_info()[1])
 
     def find(self, entitytype, id):
         """
@@ -61,13 +61,14 @@ class SqlitePersistence:
         :return: returns the results of the query in the form of an
                  object that of the type requested.
         """
-        return self.session.query(entitytype).filter_by(id=id).first()
+        result = self.session.query(entitytype).filter(entitytype.id == id).first()
+        return result
 
     def get_incomplete_items(self):
         """
         :return: return list of items that are incomplete
         """
-        return self.session.query(Item).filter(Item.completed_at.is_(None))
+        return self.session.query(Item).filter(Item.completed_at.is_(None)).all()
 
     def edit(self, entitytype, id, data):
         """
@@ -102,7 +103,7 @@ class SqlitePersistence:
             self.session.commit()
             return element
         except:
-            return "Unexpected Error:'%s'" % sys.exc_info()[0]
+            return "Unexpected Error:'%s' - '%s'" % (sys.exc_info()[0], sys.exc_info()[1])
 
     def complete(self, entitytype, id):
         """
@@ -124,7 +125,7 @@ class SqlitePersistence:
             self.session.commit()
             return element
         except:
-            return "Unexpected Error:'%s'" % sys.exc_info()[0]
+            return "Unexpected Error:'%s' - '%s'" % (sys.exc_info()[0], sys.exc_info()[1])
 
     def incomplete(self, entitytype, id):
         """
@@ -146,10 +147,33 @@ class SqlitePersistence:
             self.session.commit()
             return element
         except:
-            return "Unexpected Error:'%s'" % sys.exc_info()[0]
+            return "Unexpected Error:'%s' - '%s'" % (sys.exc_info()[0], sys.exc_info()[1])
 
     def get_items_completed_in_past_day(self):
         try:
-            self.session.query(Item).filter(Item.completed_at > datetime.datetime.now() - datetime.timedelta(days=1))
+            return self.session.query(Item).filter(Item.completed_at > datetime.datetime.now() - datetime.timedelta(days=1))
         except:
-            return "Unexpected Error:'%s'" % sys.exc_info()[0]
+            return "Unexpected Error:'%s' - '%s'" % (sys.exc_info()[0], sys.exc_info()[1])
+
+    def truncate_table(self, entitytype):
+        delete(entitytype).where(Item.id > 0)
+        self.session.commit()
+
+    def truncate_all_tables(self):
+        stmt = delete(Note).where(Note.id > 0)
+        self.engine.execute(stmt)
+        stmt = delete(Task).where(Task.id > 0)
+        self.engine.execute(stmt)
+        stmt = delete(Item).where(Item.id > 0)
+        self.engine.execute(stmt)
+
+    def _setup_session(self):
+        connection_string = "sqlite:///%s" % str(self.dbpath)
+        self.engine = create_engine(connection_string)
+        Base.metadata.create_all(self.engine)
+        session = sessionmaker(bind=self.engine)
+        self.session = session()
+
+    def reset_session(self):
+        self.session.close()
+        self._setup_session()
