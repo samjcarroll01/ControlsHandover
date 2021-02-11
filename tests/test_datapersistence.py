@@ -145,6 +145,22 @@ class TestSqlitePersistence(TestCase):
 
         self.assertEqual(1, complete_items.count())
 
+    def test_get_items_completed_in_past_day(self):
+        item2 = Item()
+        item2.rig = "X02"
+        item2.description = "Another description"
+        item2.case = "CAS-23456"
+        item2.completed_at = datetime.datetime.now() - datetime.timedelta(days=6)
+        self._db.save(item2)
+        self._db.complete(Item, 2)
+
+        item1 = self._db.find(Item, 1)
+        self._db.find(Item, item1.id)
+
+        complete_items = self._db.get_items_completed_in_past_day()
+
+        self.assertEqual(1, complete_items.count())
+
     def prep_db(self):
         db = SqlitePersistence(":memory:")
         db.session.rollback()

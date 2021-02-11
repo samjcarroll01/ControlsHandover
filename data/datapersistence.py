@@ -155,6 +155,12 @@ class SqlitePersistence:
         except:
             return "Unexpected Error:'%s' - '%s'" % (sys.exc_info()[0], sys.exc_info()[1])
 
+    def get_items_completed_in_past_week(self):
+        try:
+            return self.session.query(Item).filter(Item.completed_at > datetime.datetime.now() - datetime.timedelta(days=7))
+        except:
+            return "Unexpected Error:'%s' - '%s'" % (sys.exc_info()[0], sys.exc_info()[1])
+
     def truncate_table(self, entitytype):
         delete(entitytype).where(Item.id > 0)
         self.session.commit()
