@@ -151,13 +151,13 @@ class SqlitePersistence:
 
     def get_items_completed_in_past_day(self):
         try:
-            return self.session.query(Item).filter(Item.completed_at > datetime.datetime.now() - datetime.timedelta(days=1))
+            return self.session.query(Item).filter(Item.completed_at > datetime.datetime.now() - datetime.timedelta(days=1)).all()
         except:
             return "Unexpected Error:'%s' - '%s'" % (sys.exc_info()[0], sys.exc_info()[1])
 
     def get_items_completed_in_past_week(self):
         try:
-            return self.session.query(Item).filter(Item.completed_at > datetime.datetime.now() - datetime.timedelta(days=7))
+            return self.session.query(Item).filter(Item.completed_at > datetime.datetime.now() - datetime.timedelta(days=7)).all()
         except:
             return "Unexpected Error:'%s' - '%s'" % (sys.exc_info()[0], sys.exc_info()[1])
 
